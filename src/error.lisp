@@ -3,6 +3,8 @@
   (:use :cl)
   (:import-from :quri
                 :render-uri)
+  (:import-from :dexador.util
+                :symbol-concat)
   (:export :http-request-failed
 
            ;; 4xx
@@ -65,7 +67,7 @@
                        status)))))
 
 (defmacro define-request-failed-condition (name code)
-  `(define-condition ,(intern (format nil "~A-~A" :http-request name)) (http-request-failed)
+  `(define-condition ,(symbol-concat "HTTP-REQUEST-" name) (http-request-failed)
      ()
      (:report (lambda (condition stream)
                 (with-slots (body uri) condition
@@ -111,7 +113,7 @@
                                     (http-version-not-supported . 505))
              collect `(define-request-failed-condition ,name ,code)
              collect `(setf (gethash ,code *request-failed-error*)
-                            ',(intern (format nil "~A-~A" :http-request name)))))
+                            ',(symbol-concat "HTTP-REQUEST-" name))))
 
 (defun http-request-failed (status &key body headers uri method)
   (cerror

@@ -26,7 +26,8 @@
            :write-header
            :with-header-output
            :write-connect-header
-           :make-random-string))
+           :make-random-string
+           :symbol-concat))
 (in-package :dexador.util)
 
 (defvar *default-connect-timeout* 10)
@@ -183,3 +184,15 @@
               ((0 1) (code-char (+ #.(char-code #\a) (random 26))))
               ((2 3) (code-char (+ #.(char-code #\A) (random 26))))
               ((4) (code-char (+ #.(char-code #\0) (random 10)))))))))
+
+(defun symbol-concat (&rest things)
+  "Concat THINGS as an interned symbol.
+Return a symbol of `*package*'. "
+  (intern
+   (with-output-to-string (sym)
+     (dolist (thing things)
+       (typecase thing
+         (symbol    (write-string (string thing) sym))
+         (string    (write-string thing sym))
+         (character (write-char   thing sym))
+         (t (format sym "~A" thing)))))))
